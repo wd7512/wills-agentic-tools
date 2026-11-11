@@ -1,6 +1,6 @@
 [project]
 name = "wills-agentic-tools"
-version = "0.1.0"
+version = "0.2.1"
 description = "Gate, repository checks and worker delegation for repos built by coding agents"
 readme = "README.md"
 license = "Apache-2.0"
