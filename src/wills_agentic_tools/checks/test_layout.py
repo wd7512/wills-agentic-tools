@@ -52,4 +52,16 @@ def check_test_layout(
             ):
                 expected = (source / rel_dir / f"{stem}.py").relative_to(repo_root)
                 violations.append(f"{rel}: no mirror source ({expected})")
+    if source.is_dir() and unit.is_dir():
+        for path in sorted(source.rglob("*.py")):
+            if path.name == "__init__.py":
+                continue
+            rel = path.relative_to(repo_root).as_posix()
+            if rel in exceptions:
+                continue
+            rel_dir = path.relative_to(source).parent
+            expected_path = unit / rel_dir / f"test_{path.stem}.py"
+            if not expected_path.is_file():
+                expected = expected_path.relative_to(repo_root)
+                violations.append(f"{rel}: no mirrored test ({expected})")
     return violations
