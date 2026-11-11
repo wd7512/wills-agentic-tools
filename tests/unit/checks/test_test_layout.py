@@ -78,9 +78,57 @@ def test_violation_layouts_flag_expected(tmp_path: Path) -> None:
     assert any("test_loose.py" in value for value in violations)
 
 
-def test_src_module_without_mirrored_test_is_accepted(tmp_path: Path) -> None:
+def test_source_module_without_mirrored_test_is_reported(tmp_path: Path) -> None:
     (tmp_path / "src" / "pkg" / "gateway").mkdir(parents=True)
     (tmp_path / "src" / "pkg" / "gateway" / "server.py").touch()
+    (tmp_path / "tests" / "unit").mkdir(parents=True)
+    violations = _check(tmp_path)
+    assert any(
+        "src/pkg/gateway/server.py" in value and "tests/unit/gateway/test_server.py" in value
+        for value in violations
+    )
+
+
+def test_source_module_with_mirrored_test_is_clean(tmp_path: Path) -> None:
+    (tmp_path / "src" / "pkg" / "gateway").mkdir(parents=True)
+    (tmp_path / "src" / "pkg" / "gateway" / "server.py").touch()
+    (tmp_path / "tests" / "unit" / "gateway").mkdir(parents=True)
+    (tmp_path / "tests" / "unit" / "gateway" / "test_server.py").touch()
+    assert _check(tmp_path) == []
+
+
+def test_excepted_source_module_is_clean(tmp_path: Path) -> None:
+    (tmp_path / "src" / "pkg").mkdir(parents=True)
+    (tmp_path / "src" / "pkg" / "cli.py").touch()
+    (tmp_path / "tests" / "unit").mkdir(parents=True)
+    assert _check(tmp_path, exceptions=["src/pkg/cli.py"]) == []
+
+
+def test_entry_points_require_an_explicit_exception(tmp_path: Path) -> None:
+    (tmp_path / "src" / "pkg").mkdir(parents=True)
+    (tmp_path / "src" / "pkg" / "cli.py").touch()
+    (tmp_path / "src" / "pkg" / "__main__.py").touch()
+    (tmp_path / "tests" / "unit").mkdir(parents=True)
+    assert any("src/pkg/cli.py" in value for value in _check(tmp_path))
+    assert any("src/pkg/__main__.py" in value for value in _check(tmp_path))
+    assert _check(tmp_path, exceptions=["src/pkg/cli.py", "src/pkg/__main__.py"]) == []
+
+
+def test_test_path_exception_does_not_hide_missing_source_mirror(tmp_path: Path) -> None:
+    (tmp_path / "src" / "pkg").mkdir(parents=True)
+    (tmp_path / "src" / "pkg" / "module.py").touch()
+    (tmp_path / "tests" / "unit").mkdir(parents=True)
+    (tmp_path / "tests" / "unit" / "test_other.py").touch()
+    violations = _check(tmp_path, exceptions=["tests/unit/test_other.py"])
+    assert any(
+        "src/pkg/module.py" in value and "tests/unit/test_module.py" in value
+        for value in violations
+    )
+
+
+def test_package_init_without_unit_mirror_is_clean(tmp_path: Path) -> None:
+    (tmp_path / "src" / "pkg" / "subpkg").mkdir(parents=True)
+    (tmp_path / "src" / "pkg" / "subpkg" / "__init__.py").touch()
     (tmp_path / "tests" / "unit").mkdir(parents=True)
     assert _check(tmp_path) == []
 
