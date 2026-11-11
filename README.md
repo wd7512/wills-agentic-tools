@@ -4,10 +4,9 @@ Development tools for repositories that are built by coding agents under one hum
 
 | Command | What it does |
 |---|---|
-| `uv run gate` | Runs format, lint, type check, tests and lock check in order. Stops at the first failure and exits with its code. |
+| `uv run gate` | Runs format, lint, type check, tests and lock check. Every part runs even after one fails; the exit code is 0 only when all pass. |
 | `uv run check` | Repository hygiene checks: test layout, test names, portable file names, secrets, untracked paths, changelog fragment. |
 | `uv run delegate` | Starts a worker model in its own git worktree with a brief, runs the gate when it finishes, and sends failures back to the same session. |
-| `uv run mutation` | Mutation testing over a chosen module. |
 
 Each command reads its settings from `[tool.devtools]` in the calling repository's `pyproject.toml`.
 

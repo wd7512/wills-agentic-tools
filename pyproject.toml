@@ -17,6 +17,11 @@ dev = [
     "ty==0.0.78",
 ]
 
+[project.scripts]
+gate = "wills_agentic_tools.gate:main"
+check = "wills_agentic_tools.check:main"
+delegate = "wills_agentic_tools.delegate:main"
+
 [build-system]
 requires = ["hatchling==1.32.4"]
 build-backend = "hatchling.build"
@@ -39,3 +44,7 @@ include = ["src"]
 testpaths = ["tests"]
 addopts = "-ra"
 timeout = 60
+
+[tool.devtools.gate]
+source = "src/"
+tests = ["tests"]
